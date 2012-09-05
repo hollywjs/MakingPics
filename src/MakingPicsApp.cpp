@@ -1,8 +1,11 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
+#include "cinder/ImageIo.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "cinder/CinderMath.h"
+#include "cinder/audio/Io.h"
+#include "cinder/audio/Output.h"
+#include "Resources.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -11,7 +14,7 @@ using namespace std;
 class MakingPicsApp : public AppBasic {
   public:
 	void setup();
-	void mouseDown( MouseEvent event );	
+	void keyDown( KeyEvent event );	
 	void update();
 	void draw();
 	void prepareSettings(Settings *settings);
@@ -29,7 +32,9 @@ private:
 	static const int scale = 144;
 
 	void lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, Color8u c);
+	void MakingPicsApp::blur(uint8_t* pixels);
 
+	audio::TrackRef mTrack;
 };
 
 void MakingPicsApp::prepareSettings( Settings *settings ){
@@ -127,17 +132,66 @@ void MakingPicsApp::lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, C
 	  }
 	}
 
+void MakingPicsApp::blur(uint8_t* pixels){
+	static uint8_t work_buffer[3*kTextureSize*kTextureSize];
+	memcpy(work_buffer, pixels, 3*kTextureSize*kTextureSize);
+
+	int8_t kernel[9] = {-2,-1,0,
+						-1, 3, 1, 
+						0, 1, 2};
+
+	//Visit every pixel in the image, except the ones on the edge.
+	//TODO Special purpose logic to handle the edge cases
+	int x, y, k, kx, ky, offset;
+	int total_red;
+	int total_green;
+	int total_blue;
+
+	for( y=1;y<kAppHeight-1;y++){
+		for( x=1;x<kAppWidth-1;x++){
+			offset = 3*(x + y*kTextureSize);
+			total_red = 0;
+			total_green = 0;
+			total_blue = 0;
+				//Compute the convolution of the kernel with the region around the current pixel
+				//I use ints for the totals and the kernel to avoid overflow
+				
+				for( ky=-1;ky<=1;ky++){
+					for( kx=-1;kx<=1;kx++){
+						offset = 3*(x + kx + (y+ky)*kTextureSize);
+						k = kernel[kx+1 + (ky+1)*3];
+						total_red   += (work_buffer[offset  ] * k);
+						total_green += (work_buffer[offset+1] * k);
+						total_blue  += (work_buffer[offset+2] * k);
+					}
+				}
+			
+			offset = 3*(x + y*kTextureSize);
+			pixels[offset]   = total_red;
+			pixels[offset+1] = total_green;
+			pixels[offset+2] = total_blue;
+		}
+	}
+}
+
+
+
 
 void MakingPicsApp::setup()
 {
 	frame_number_=0;
 	//This is the setup that everyone needs to do
 	mySurface_ = new Surface(kTextureSize,kTextureSize,false);
+	mTrack = audio::Output::addTrack( audio::load( loadResource( RES_PF ) ) );
 }
 
-void MakingPicsApp::mouseDown( MouseEvent event )
+void MakingPicsApp::keyDown( KeyEvent event )
 {
+	if( event.getChar() == 'p' ) {
+		( mTrack->isPlaying() ) ? mTrack->stop() : mTrack->play();
+	}
 }
+
 
 void MakingPicsApp::update()
 {
@@ -221,29 +275,14 @@ for (int h = 0; h <= 5; h++) {
 			dataArray[offset + 2] = c.b;
 		}
 
-		/*
-	for (int y = 0; y < burst_height; y++){
-		i--;
-		j++;
-		c = Color8u(255 - (10 * y), 255 - (10*y), 255 - (10 * y));
-		for (int x = i; x < burst_height; x++){
-			offset = (3*((y + kAppWidth/2 - burst_height) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
-			dataArray[offset] = c.r;
-			dataArray[offset + 1] = c.g;
-			dataArray[offset + 2] = c.b;
-	}
-		for (int x = j; x < burst_height; x++){
-			offset = (3*((y + kAppWidth/2) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
-			dataArray[offset] = c.r;
-			dataArray[offset + 1] = c.g;
-			dataArray[offset + 2] = c.b;
-	}
-	}
-	*/
+		
 	}
 
+	//blur(dataArray);
+
+
 	if(frame_number_ == 0){
-		//writeImage("brinkmwj.png",*mySurface_);
+		writeImage("darkside.png",*mySurface_);
 		//We do this here, instead of setup, because we don't want to count the writeImage time in our estimate
 		app_start_time_ = boost::posix_time::microsec_clock::local_time();
 	}
