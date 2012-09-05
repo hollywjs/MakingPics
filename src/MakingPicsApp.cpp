@@ -7,6 +7,7 @@
 * @date 9/5/2012
 *
 * Feel free to take any of this code and reuse in any way you like.
+* @note Fullfills A.1, A.3, A.4, A.7, B.1, C, D, Stretch.6
 */
 
 #include "cinder/app/AppBasic.h"
@@ -213,6 +214,7 @@ for some reason the KeyEvent seems to add noise to the stream.
 
 void MakingPicsApp::keyDown( KeyEvent event )
 {
+	// P turns music on/off
 	if( event.getChar() == 'p' ) {
 		( mTrack->isPlaying() ) ? mTrack->stop() : mTrack->play();
 	}
