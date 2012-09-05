@@ -1,3 +1,14 @@
+/**
+* @ file MakingPicsApp.cpp
+* Solution for HW 1.
+* CSE 274
+*
+* @author Steve Marshall
+* @date 9/5/2012
+*
+* Feel free to take any of this code and reuse in any way you like.
+*/
+
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
@@ -32,9 +43,9 @@ private:
 	static const int scale = 144;
 
 	void lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, Color8u c);
-	void MakingPicsApp::blur(uint8_t* pixels);
+	void blur(uint8_t* pixels);
 
-	audio::TrackRef mTrack;
+	audio::TrackRef mTrack;    //Creates track reference for audio
 };
 
 void MakingPicsApp::prepareSettings( Settings *settings ){
@@ -43,7 +54,11 @@ void MakingPicsApp::prepareSettings( Settings *settings ){
 }
 
 
-
+/*
+This line function is based on Bresnseham's Line Algorithm. The original coding was
+created by Muhammad Tahir Shahzad http://mtshome.sw3solutions.com/cppComputerGraphics.html#Ellipse
+and has been modified to fit the needs of this program. Fullfills requirement A.3
+*/
 void MakingPicsApp::lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, Color8u c)
     {
        
@@ -54,6 +69,7 @@ void MakingPicsApp::lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, C
        int x2=x_2;
        int y2=y_2;
 
+	   // Makes x2 largest x coord
        if(x_1>x_2)
 	  {
 	     x1=x_2;
@@ -65,8 +81,10 @@ void MakingPicsApp::lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, C
 
        int dx=abs(x2-x1);
        int dy=abs(y2-y1);
+	   // Assigns dec a val of 1 or -1 based on fn value
        int inc_dec=((y2>=y1)?1:-1);
 
+	   // Determines if change in x is greater than change in y (more x values than y)
        if(dx>dy)
 	  {
 	     int two_dy=(2*dy);
@@ -132,6 +150,10 @@ void MakingPicsApp::lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, C
 	  }
 	}
 
+/*
+Blurs image with surrounding pixels. Since this image is low resolution with little pixel variation, the 
+result is not pretty. If you want to see it, un-comment it in the Update section.
+*/
 void MakingPicsApp::blur(uint8_t* pixels){
 	static uint8_t work_buffer[3*kTextureSize*kTextureSize];
 	memcpy(work_buffer, pixels, 3*kTextureSize*kTextureSize);
@@ -141,7 +163,6 @@ void MakingPicsApp::blur(uint8_t* pixels){
 						0, 1, 2};
 
 	//Visit every pixel in the image, except the ones on the edge.
-	//TODO Special purpose logic to handle the edge cases
 	int x, y, k, kx, ky, offset;
 	int total_red;
 	int total_green;
@@ -153,9 +174,8 @@ void MakingPicsApp::blur(uint8_t* pixels){
 			total_red = 0;
 			total_green = 0;
 			total_blue = 0;
-				//Compute the convolution of the kernel with the region around the current pixel
-				//I use ints for the totals and the kernel to avoid overflow
-				
+		
+				//Computes color value for each pixel and applies convolution
 				for( ky=-1;ky<=1;ky++){
 					for( kx=-1;kx<=1;kx++){
 						offset = 3*(x + kx + (y+ky)*kTextureSize);
@@ -182,8 +202,14 @@ void MakingPicsApp::setup()
 	frame_number_=0;
 	//This is the setup that everyone needs to do
 	mySurface_ = new Surface(kTextureSize,kTextureSize,false);
+	//Loads audio track
 	mTrack = audio::Output::addTrack( audio::load( loadResource( RES_PF ) ) );
 }
+
+/* 
+Turns music on and off. Fullfills Stretch Goals 6. The sound gets buggy,
+for some reason the KeyEvent seems to add noise to the stream.
+*/
 
 void MakingPicsApp::keyDown( KeyEvent event )
 {
@@ -192,7 +218,8 @@ void MakingPicsApp::keyDown( KeyEvent event )
 	}
 }
 
-
+// Most of these updates should be in functions, but I was worried about rendering
+// time and repeated calls to functions in for loops
 void MakingPicsApp::update()
 {
 	//Get our array of pixel information
@@ -208,6 +235,7 @@ void MakingPicsApp::update()
 	}
 	
 	// Draw Rainbow
+	// Fullfills A.1
 	Color8u c;
 	int row_start = 0;
 	int row_max = 12;
@@ -236,11 +264,14 @@ for (int h = 0; h <= 5; h++) {
 }
 	
 	for (int i = 0; i < row_max; i++) {
+		// Creates parallelogram. Fullfills A.1
 		lines(dataArray, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.8 * (row_start + i) + (kAppHeight/2) + total_lines/2), c);
+		// Neat accidental effect
 		//lines(dataArray, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.9) * (row_start + i + (kAppHeight/2) + total_lines/2), c);
 	}
 }
 	//Draw Triangle
+	// Fullfills A.7
 	c = Color8u(255, 255, 255);
 	for (int i = 0; i < 5; i++) {
 		c = Color8u(255 - 20 * i, 255 -  20* i, 255 - 20 * i);
@@ -250,11 +281,13 @@ for (int h = 0; h <= 5; h++) {
 	}
 
 	// Draw Ray
+	// Fullfills A.3
 	for (int i = 0; i < 5; i++) {
 	lines(dataArray, kAppWidth/2 - 2 * scale, kAppWidth/2 - (int)(.5 * scale) - i, kAppHeight/2 + (int)(scale * .4) + i, kAppHeight/2 + i, Color8u(255, 255, 255));
 	}
 
 	// Draw Burst
+	// Fullfills A.4
 	int offset = 0;
 	int burst_size = 25;
 	int i = burst_size;
