@@ -45,6 +45,10 @@ private:
 
 	void lines(uint8_t* pixels, int x_1, int x_2, int y_1, int y_2, Color8u c);
 	void blur(uint8_t* pixels);
+	void MakingPicsApp::drawTriangle(uint8_t* pixels); //Creates a drawTriangle method
+	void MakingPicsApp::drawRay(uint8_t* pixels); //Creates a drawRay method
+	void MakingPicsApp::drawRainbow(uint8_t* pixels); //Creates a drawRainbow method
+	void MakingPicsApp::drawBurst(uint8_t* pixels, int offSet, int burstSize); //Creates a drawBurst method
 
 	audio::TrackRef mTrack;    //Creates track reference for audio
 };
@@ -195,8 +199,92 @@ void MakingPicsApp::blur(uint8_t* pixels){
 	}
 }
 
+//This method draws triangles
+//Draw Triangle
+// Fullfills A.7
+void MakingPicsApp::drawTriangle(uint8_t* pixels){
+	Color8u c = Color8u(255, 255, 255);
+	for (int i = 0; i < 5; i++) {
+		c = Color8u(255 - 20 * i, 255 -  20* i, 255 - 20 * i);
+	lines(pixels, kAppWidth/2 - scale - i, kAppWidth/2 - i, kAppHeight/2 + scale + i, kAppHeight/2 - scale - i, c);
+	lines(pixels, kAppWidth/2 - i, kAppWidth/2 + scale - i, kAppHeight/2 - scale - i, kAppHeight/2 + scale + i, c);
+	lines(pixels, kAppWidth/2 - scale - i, kAppWidth/2 + scale + i, kAppHeight/2 + scale + i, kAppHeight/2 + scale + i, c);
+	}
+};
 
+// This method draws rays
+// Draw Ray
+// Fullfills A.3
+void MakingPicsApp::drawRay(uint8_t* pixels){
+	for (int i = 0; i < 5; i++) {
+	lines(pixels, kAppWidth/2 - 2 * scale, kAppWidth/2 - (int)(.5 * scale) - i, kAppHeight/2 + (int)(scale * .4) + i, kAppHeight/2 + i, Color8u(255, 255, 255));
+	}
+};
 
+// This method draws the rainbow
+// Draw Rainbow
+// Fullfills A.1
+void MakingPicsApp::drawRainbow(uint8_t* pixels){
+	Color8u c;
+	int row_start = 0;
+	int row_max = 12;
+	int total_lines = row_max * 6;
+for (int h = 0; h <= 5; h++) {
+	row_start = row_max * h;
+	switch (h) {
+		case 0:
+		c = Color8u(255, 0, 0);
+		break;
+		case 1:
+		c = Color8u(255, 165, 0);
+		break;
+		case 2:
+		c = Color8u(255, 255, 0);
+		break;
+		case 3:
+		c = Color8u(0, 255, 0);
+		break;
+		case 4:
+		c = Color8u(0, 0, 255);
+		break;
+		case 5:
+		c = Color8u(138, 43, 226);
+		break;
+}
+	
+	for (int i = 0; i < row_max; i++) {
+		// Creates parallelogram. Fullfills A.1
+		lines(pixels, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.8 * (row_start + i) + (kAppHeight/2) + total_lines/2), c);
+		// Neat accidental effect
+		lines(pixels, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.9) * (row_start + i + (kAppHeight/2) + total_lines/2), c);
+	}
+}
+};
+
+//This draws the burst, it is more generic and the offset and burstsize
+//can be changed
+// Draw Burst
+// Fullfills A.4
+void MakingPicsApp::drawBurst(uint8_t* pixels, int offSet, int burstSize){
+	int i = burstSize;
+
+	for (int x = 0; x <= burstSize; x++){
+		i--;
+		Color8u c = Color8u(255 - (10 * x), 255 - (10*x), 255 - (10 * x));
+		for (int y = i; y <= burstSize; y++){
+			offSet = (3*((kAppWidth/2 - y + burstSize) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
+			pixels[offSet] = c.r;
+			pixels[offSet + 1] = c.g;
+			pixels[offSet + 2] = c.b;
+	}
+		for (int y = i; y <= burstSize; y++){
+			offSet = (3*((y + kAppWidth/2 - burstSize) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
+			pixels[offSet] = c.r;
+			pixels[offSet + 1] = c.g;
+			pixels[offSet + 2] = c.b;
+		}
+	}
+};
 
 void MakingPicsApp::setup()
 {
@@ -233,89 +321,15 @@ void MakingPicsApp::update()
 		dataArray[3*(y * kTextureSize + x)] = 0;
 		dataArray[3*(y * kTextureSize + x) + 1] = 0;
 		dataArray[3*(y * kTextureSize + x) + 2] = 0;
-	}
-	}
-	
-	// Draw Rainbow
-	// Fullfills A.1
-	Color8u c;
-	int row_start = 0;
-	int row_max = 12;
-	int total_lines = row_max * 6;
-for (int h = 0; h <= 5; h++) {
-	row_start = row_max * h;
-	switch (h) {
-		case 0:
-		c = Color8u(255, 0, 0);
-		break;
-		case 1:
-		c = Color8u(255, 165, 0);
-		break;
-		case 2:
-		c = Color8u(255, 255, 0);
-		break;
-		case 3:
-		c = Color8u(0, 255, 0);
-		break;
-		case 4:
-		c = Color8u(0, 0, 255);
-		break;
-		case 5:
-		c = Color8u(138, 43, 226);
-		break;
-}
-	
-	for (int i = 0; i < row_max; i++) {
-		// Creates parallelogram. Fullfills A.1
-		lines(dataArray, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.8 * (row_start + i) + (kAppHeight/2) + total_lines/2), c);
-		// Neat accidental effect
-		//lines(dataArray, (int)(kAppWidth/2 + (36 * tan(3.141592654/3)) + (double)((row_start + i )/1.732050808)-10), (int)(kAppWidth/2 + 2 * scale), row_start + i + (kAppHeight/2) - total_lines/2, (int) (.9) * (row_start + i + (kAppHeight/2) + total_lines/2), c);
-	}
-}
-	//Draw Triangle
-	// Fullfills A.7
-	c = Color8u(255, 255, 255);
-	for (int i = 0; i < 5; i++) {
-		c = Color8u(255 - 20 * i, 255 -  20* i, 255 - 20 * i);
-	lines(dataArray, kAppWidth/2 - scale - i, kAppWidth/2 - i, kAppHeight/2 + scale + i, kAppHeight/2 - scale - i, c);
-	lines(dataArray, kAppWidth/2 - i, kAppWidth/2 + scale - i, kAppHeight/2 - scale - i, kAppHeight/2 + scale + i, c);
-	lines(dataArray, kAppWidth/2 - scale - i, kAppWidth/2 + scale + i, kAppHeight/2 + scale + i, kAppHeight/2 + scale + i, c);
-	}
-
-	// Draw Ray
-	// Fullfills A.3
-	for (int i = 0; i < 5; i++) {
-	lines(dataArray, kAppWidth/2 - 2 * scale, kAppWidth/2 - (int)(.5 * scale) - i, kAppHeight/2 + (int)(scale * .4) + i, kAppHeight/2 + i, Color8u(255, 255, 255));
-	}
-
-	// Draw Burst
-	// Fullfills A.4
-	int offset = 0;
-	int burst_size = 25;
-	int i = burst_size;
-
-	for (int x = 0; x <= burst_size; x++){
-		i--;
-		c = Color8u(255 - (10 * x), 255 - (10*x), 255 - (10 * x));
-		for (int y = i; y <= burst_size; y++){
-			offset = (3*((kAppWidth/2 - y + burst_size) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
-			dataArray[offset] = c.r;
-			dataArray[offset + 1] = c.g;
-			dataArray[offset + 2] = c.b;
-	}
-		for (int y = i; y <= burst_size; y++){
-			offset = (3*((y + kAppWidth/2 - burst_size) * kTextureSize + (x + kAppWidth/2 - (int)(.5 * scale))));
-			dataArray[offset] = c.r;
-			dataArray[offset + 1] = c.g;
-			dataArray[offset + 2] = c.b;
 		}
-
-		
-	}
-
-	//blur(dataArray);
-
-
+	}	
+	
+	drawRainbow(dataArray);
+	drawTriangle(dataArray);
+	drawRay(dataArray);
+	drawBurst(dataArray,0,50);
+	blur(dataArray);
+	
 	if(frame_number_ == 0){
 		writeImage("darkside.png",*mySurface_);
 		//We do this here, instead of setup, because we don't want to count the writeImage time in our estimate

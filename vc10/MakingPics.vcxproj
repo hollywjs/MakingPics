@@ -47,7 +47,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\..\..\Cinder\cinder_0.8.4_vc2010\include;..\..\..\Cinder\cinder_0.8.4_vc2010\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jessica\Downloads\cinder_0.8.4_vc2010\cinder_0.8.4_vc2010\boost;C:\Users\Jessica\Downloads\cinder_0.8.4_vc2010\cinder_0.8.4_vc2010\include;..\include;..\..\..\Cinder\cinder_0.8.4_vc2010\include;..\..\..\Cinder\cinder_0.8.4_vc2010\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -58,11 +58,11 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\Cinder\cinder_0.8.4_vc2010\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jessica\Downloads\cinder_0.8.4_vc2010\cinder_0.8.4_vc2010\include;..\..\..\Cinder\cinder_0.8.4_vc2010\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>cinder_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\Cinder\cinder_0.8.4_vc2010\lib;..\..\..\Cinder\cinder_0.8.4_vc2010\lib\msw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Jessica\Downloads\cinder_0.8.4_vc2010\cinder_0.8.4_vc2010\lib\msw;C:\Users\Jessica\Downloads\cinder_0.8.4_vc2010\cinder_0.8.4_vc2010\lib;..\..\..\Cinder\cinder_0.8.4_vc2010\lib;..\..\..\Cinder\cinder_0.8.4_vc2010\lib\msw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
